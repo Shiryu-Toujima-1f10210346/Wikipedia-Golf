@@ -1,4 +1,3 @@
-import { get } from "http";
 import React, { useState, useEffect } from "react";
 
 export default function Home() {
@@ -10,6 +9,30 @@ export default function Home() {
   const [stroke, setStroke] = useState(-1);
   const [goal, setGoal] = useState<string>("");
   const [isStart, setIsStart] = useState(false);
+  const [goalArticle, setGoalArticle] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const modalControl = () => {
+    setIsModalOpen(!isModalOpen);
+    console.log(goalArticle);
+  };
+  const GoalModal = () => (
+    <div style={{ display: isModalOpen ? "block" : "none" }} className="w-2/5">
+      <div>
+        {/* モーダルのコンテンツ */}
+
+        {/* 記事内のリンクを無効化してくれ */}
+
+        <h2>ゴール</h2>
+        <div
+          dangerouslySetInnerHTML={{ __html: goalArticle }}
+          id="articleContent2"
+          className="flex-grow p-4 flex flex-col"
+        ></div>
+        <button onClick={modalControl}>閉じる</button>
+      </div>
+    </div>
+  );
 
   const pickStart = async () => {
     try {
@@ -21,18 +44,37 @@ export default function Home() {
       setTitle(randomTitle);
       setIsStart(true);
     } catch (error) {
-      console.error("ランダムなページの取得に失敗しました", error);
+      console.error("スタートページの取得に失敗しました", error);
     }
   };
 
   const getGoal = async () => {
-    const response = await fetch(
-      "https://ja.wikipedia.org/w/api.php?action=query&list=random&rnnamespace=0&rnlimit=1&format=json&origin=*"
-    );
-    const data = await response.json();
-    const randomTitle = data.query.random[0].title;
-    console.log("goal", randomTitle);
-    setGoal(randomTitle);
+    try {
+      const response = await fetch(
+        "https://ja.wikipedia.org/w/api.php?action=query&list=random&rnnamespace=0&rnlimit=1&format=json&origin=*"
+      );
+      const data = await response.json();
+      const randomTitle = data.query.random[0].title;
+      setGoal(randomTitle);
+      const url = `https://ja.wikipedia.org/w/api.php?action=parse&page=${randomTitle}&format=json&origin=*`;
+      const response2 = await fetch(url);
+      const data2 = await response2.json();
+      setGoalArticle(data2.parse.text["*"]);
+    } catch (error) {
+      console.error("ゴールページの取得に失敗しました", error);
+    }
+    // const response = await fetch(
+    //   "https://ja.wikipedia.org/w/api.php?action=query&list=random&rnnamespace=0&rnlimit=1&format=json&origin=*"
+    // );
+    // const data = await response.json();
+    // if (data.parse && data.parse.text && data.parse.text["*"]) {
+    //   setGoalArticle(data.parse.text["*"]);
+    // } else {
+    //   console.error("必要なデータがレスポンスに含まれていません。");
+    // }
+    // const randomTitle = data.query.random[0].title;
+    // console.log("goal", randomTitle);
+    // setGoal(randomTitle);
   };
 
   useEffect(() => {
@@ -130,7 +172,9 @@ export default function Home() {
           {goal !== "" && stroke > -1 ? (
             <div>
               <h2>ゴール</h2>
-              <p className="text-3xl">{goal}</p>
+              <button onClick={modalControl} className="text-red-600 text-3xl">
+                {goal}
+              </button>
             </div>
           ) : (
             <div>
@@ -143,22 +187,26 @@ export default function Home() {
             {history.map((item, index) => (
               <li key={index}>
                 {item.stroke == 0 ? (
-                  <span>
-                    スタート:
+                  <span className="text-center">
                     <div className="text-green-600 font-bold text-3xl">
-                      {item.title}
+                      スタート:{item.title}
                     </div>
+                    <div>↓</div>
                   </span>
                 ) : (
-                  <span>
-                    {item.stroke}:{item.title}
-                  </span>
+                  <div className="text-center text-2xl">
+                    <span>
+                      {item.stroke}打目:{item.title}
+                    </span>
+                    <div>↓</div>
+                  </div>
                 )}
               </li>
             ))}
           </ul>
         </div>
         {/* コンテンツセクション */}
+        <GoalModal />
         <div
           dangerouslySetInnerHTML={{ __html: content }}
           id="articleContent"
