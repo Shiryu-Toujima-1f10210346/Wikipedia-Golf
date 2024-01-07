@@ -25,3 +25,17 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+#articleContent a {
+  color: #4299e1;
+}
+
+#articleContent a:hover {
+  color: #2b6cb0;
+}
+
+/* #articleContent {
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+} */
