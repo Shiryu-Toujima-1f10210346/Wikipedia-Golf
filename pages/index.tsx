@@ -16,6 +16,25 @@ export default function Home() {
     "start"
   );
 
+  const ShareModal = () => {
+    if (gameState === "gameover") {
+      return (
+        <div className="game-over bg-gray-900">
+          <h1>おめでとうございます！ゴールに到達しました！</h1>
+          <p>打数: {stroke}</p>
+          <TwitterShareButton
+            // url={location.href}
+            url="https://wikipedia-golf.vercel.app/"
+            title={`Wikipedia Golfで｢${history[0].title}｣から${stroke}打で｢${goal}｣に到達しました！`}
+            hashtags={["WikipediaGolf"]}
+          >
+            <XIcon size={32} round={true} />
+          </TwitterShareButton>
+        </div>
+      );
+    }
+  };
+
   const modalControl = () => {
     setIsModalOpen(!isModalOpen);
     console.log(goalArticle);
@@ -177,20 +196,7 @@ export default function Home() {
         >
           戻る
         </button> */}
-        {gameState === "gameover" && (
-          <div className="game-over bg-gray-900">
-            <h1>おめでとうございます！ゴールに到達しました！</h1>
-            <p>打数: {stroke}</p>
-            <TwitterShareButton
-              // url={location.href}
-              url="https://wikipedia-golf.vercel.app/"
-              title={`Wikipedia Golfで${history[0].title}から${stroke}打で${goal}に到達しました！`}
-              hashtags={["WikipediaGolf"]}
-            >
-              <XIcon size={32} round={true} />
-            </TwitterShareButton>
-          </div>
-        )}
+        <ShareModal />
       </div>
       <div className="bg-gray-100 text-black mr-96 flex flex-row justify-start items-start">
         {/* 履歴セクション */}
