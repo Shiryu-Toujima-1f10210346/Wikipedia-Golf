@@ -38,7 +38,6 @@ export default function Home() {
 
   const modalControl = () => {
     setIsModalOpen(!isModalOpen);
-    console.log(goalArticle);
   };
   const GoalModal = () => (
     <div className={`${isModalOpen ? "w-2/5" : "hidden"} bg-white p-4`}>
@@ -73,6 +72,7 @@ export default function Home() {
       );
       const data = await response.json();
       const randomTitle = data.query.random[0].title;
+      console.log(randomTitle + "をゴールに設定しました");
       setGoal(randomTitle);
       const url = `https://ja.wikipedia.org/w/api.php?action=parse&page=${randomTitle}&format=json&origin=*`;
       const response2 = await fetch(url);
@@ -151,10 +151,10 @@ export default function Home() {
       if (!confirm) return;
     }
     setGameState("start");
+    setStroke(-1);
     await getGoal();
     setHistory([]);
     await pickStart();
-    setStroke(-1);
     setIsModalOpen(true);
   };
 
@@ -192,8 +192,9 @@ export default function Home() {
       <div className="bg-gray-100 text-black mr-96 flex flex-row justify-start items-start">
         {/* 履歴セクション */}
         {/* fix this スクロールできない */}
-        <div className="history flex-none w-1/4 h-4/5 p-4 bg-white border-r-2 border-white rounded-2xl mt-10 sticky top-20 overflow-y-scroll">
-          {goal !== "" && stroke > -1 ? (
+        <div className="history flex-none w-1/4 h-4/5 p-4 bg-white border-r-2 border-white rounded-2xl mr-5 sticky top-20">
+          {/* {goal !== "" && stroke > -1 ? ( */}
+          {goal !== "" ? (
             <div className="text-center">
               <p className="text-xl">
                 ↓をクリックすると
@@ -216,7 +217,7 @@ export default function Home() {
           )}
 
           <h2>履歴</h2>
-          <ul>
+          <ul className="overflow-auto max-h-screen">
             {history.map((item, index) => (
               <li key={index}>
                 {item.stroke == 0 ? (
