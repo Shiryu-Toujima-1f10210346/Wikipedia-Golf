@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { XIcon, TwitterShareButton } from "react-share";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function Home() {
   const [title, setTitle] = useState("メインページ");
@@ -15,6 +16,7 @@ export default function Home() {
   const [gameState, setGameState] = useState<"start" | "playing" | "gameover">(
     "start"
   );
+  const [isLoading, setIsLoading] = useState(false);
 
   const ShareModal = () => {
     if (gameState === "gameover") {
@@ -88,18 +90,6 @@ export default function Home() {
     } catch (error) {
       console.error("ゴールページの取得に失敗しました", error);
     }
-    // const response = await fetch(
-    //   "https://ja.wikipedia.org/w/api.php?action=query&list=random&rnnamespace=0&rnlimit=1&format=json&origin=*"
-    // );
-    // const data = await response.json();
-    // if (data.parse && data.parse.text && data.parse.text["*"]) {
-    //   setGoalArticle(data.parse.text["*"]);
-    // } else {
-    //   console.error("必要なデータがレスポンスに含まれていません。");
-    // }
-    // const randomTitle = data.query.random[0].title;
-    // console.log("goal", randomTitle);
-    // setGoal(randomTitle);
   };
 
   const checkIfGameOver = (title: string) => {
@@ -126,6 +116,7 @@ export default function Home() {
   }, [content]);
 
   const fetchTitle = async (title: string) => {
+    setIsLoading(true);
     const url = `https://ja.wikipedia.org/w/api.php?action=parse&page=${title}&format=json&origin=*`;
     try {
       const response = await fetch(url);
@@ -141,6 +132,8 @@ export default function Home() {
       checkIfGameOver(title);
     } catch (error) {
       console.error("記事の取得に失敗しました", error);
+    } finally {
+      setIsLoading(false); // ローディング終了
     }
   };
 
@@ -198,6 +191,12 @@ export default function Home() {
         </button> */}
         <ShareModal />
       </div>
+      {/* ローディングアイコンを表示 */}
+      {isLoading && (
+        <div className="flex justify-center items-center h-screen w-screen">
+          <CircularProgress />
+        </div>
+      )}
       <div className="bg-gray-100 text-black mr-96 flex flex-row justify-start items-start">
         {/* 履歴セクション */}
         {/* fix this スクロールできない */}
