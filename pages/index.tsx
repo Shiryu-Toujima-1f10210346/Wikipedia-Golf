@@ -3,16 +3,15 @@ import { XIcon, TwitterShareButton } from "react-share";
 import CircularProgress from "@mui/material/CircularProgress";
 
 export default function Home() {
-  const [title, setTitle] = useState("メインページ");
+  const [title, setTitle] = useState<string>("メインページ");
   const [content, setContent] = useState("");
   const [history, setHistory] = useState<
     { title: string; url: string; stroke: number }[]
   >([]);
-  const [stroke, setStroke] = useState(-1);
+  const [stroke, setStroke] = useState<number>(-1);
   const [goal, setGoal] = useState<string>("");
-  const [isStart, setIsStart] = useState(false);
   const [goalArticle, setGoalArticle] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [gameState, setGameState] = useState<"start" | "playing" | "gameover">(
     "start"
   );
@@ -44,10 +43,7 @@ export default function Home() {
   const GoalModal = () => (
     <div className={`${isModalOpen ? "w-2/5" : "hidden"} bg-white p-4`}>
       <div>
-        {/* モーダルのコンテンツ */}
-
-        {/* 記事内のリンクを無効化してくれ */}
-
+        <div className="text-center text-3xl">{goal}</div>
         <div
           dangerouslySetInnerHTML={{ __html: goalArticle }}
           id="articleContent2"
@@ -150,11 +146,16 @@ export default function Home() {
   };
 
   const start = async () => {
+    if (stroke > 0) {
+      const confirm = window.confirm("別のお題でやり直しますか？");
+      if (!confirm) return;
+    }
     setGameState("start");
     await getGoal();
     setHistory([]);
     await pickStart();
     setStroke(-1);
+    setIsModalOpen(true);
   };
 
   return (
@@ -241,7 +242,7 @@ export default function Home() {
         <GoalModal />
         {isLoading ? (
           <div
-            className={`flex justify-center items-center h-screen w-screen  ${
+            className={`flex justify-center items-center h-screen  ${
               isModalOpen ? "w-2/5" : "w-4/5"
             }`}
           >
@@ -252,7 +253,7 @@ export default function Home() {
             id="articleContent"
             dangerouslySetInnerHTML={{ __html: content }}
             className={`flex-grow p-4 flex flex-col ${
-              isModalOpen ? (isLoading ? "hidden" : "w-2/5") : "w-4/5"
+              isModalOpen ? "w-2/5" : "w-4/5"
             }`}
           />
         )}
