@@ -188,12 +188,6 @@ export default function Home() {
         </button> */}
         <ShareModal />
       </div>
-      {/* ローディングアイコンを表示 */}
-      {isLoading && (
-        <div className="flex justify-center items-center h-screen w-screen">
-          <CircularProgress />
-        </div>
-      )}
       <div className="bg-gray-100 text-black mr-96 flex flex-row justify-start items-start">
         {/* 履歴セクション */}
         {/* fix this スクロールできない */}
@@ -236,13 +230,19 @@ export default function Home() {
         </div>
         {/* コンテンツセクション */}
         <GoalModal />
-        <div
-          dangerouslySetInnerHTML={{ __html: content }}
-          id="articleContent"
-          className={`${
-            isModalOpen ? "w-2/5" : "w-4/5"
-          } flex-grow p-4 flex flex-col`}
-        ></div>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-screen w-screen">
+            <CircularProgress />
+          </div>
+        ) : (
+          <div
+            id="articleContent"
+            dangerouslySetInnerHTML={{ __html: content }}
+            className={`flex-grow p-4 flex flex-col ${
+              isModalOpen ? "w-2/5" : "w-4/5"
+            }`}
+          />
+        )}
       </div>
     </div>
   );

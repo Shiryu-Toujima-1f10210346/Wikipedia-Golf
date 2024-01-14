@@ -34,6 +34,11 @@ body {
   color: #2b6cb0;
 }
 
+#articleContent2 a {
+  /* リンクを踏めないように */
+  pointer-events: none;
+}
+
 /* #articleContent {
   text-align: center;
   justify-content: center;
