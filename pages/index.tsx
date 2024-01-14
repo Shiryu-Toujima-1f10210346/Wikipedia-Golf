@@ -72,7 +72,6 @@ export default function Home() {
       );
       const data = await response.json();
       const randomTitle = data.query.random[0].title;
-      console.log(randomTitle + "をゴールに設定しました");
       setGoal(randomTitle);
       const url = `https://ja.wikipedia.org/w/api.php?action=parse&page=${randomTitle}&format=json&origin=*`;
       const response2 = await fetch(url);
@@ -129,7 +128,18 @@ export default function Home() {
       window.scrollTo(0, 0);
     }
   };
+  useEffect(() => {
+    const links = document.querySelectorAll("#articleContent a");
+    links.forEach((link) => {
+      link.addEventListener("click", handleLinkClick);
+    });
 
+    return () => {
+      links.forEach((link) => {
+        link.removeEventListener("click", handleLinkClick);
+      });
+    };
+  }, [content]);
   const handleLinkClick = (event: any) => {
     event.preventDefault();
     const title = event.target.getAttribute("title");
