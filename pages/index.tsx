@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { XIcon, TwitterShareButton } from "react-share";
 import CircularProgress from "@mui/material/CircularProgress";
+import countReferer from "@/useCase/referer";
+import { count } from "console";
 
 export default function Home() {
-  const [title, setTitle] = useState<string>("メインページ");
+  const [title, setTitle] = useState<string>("メインページ"); //英語版は"Main Page"
+  const [locale, setLocale] = useState<"en" | "ja">("ja");
   const [content, setContent] = useState("");
   const [history, setHistory] = useState<
     { title: string; url: string; stroke: number }[]
@@ -12,10 +15,22 @@ export default function Home() {
   const [goal, setGoal] = useState<string>("");
   const [goalArticle, setGoalArticle] = useState("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [gameState, setGameState] = useState<"start" | "playing" | "gameover">(
-    "start"
+  const [gameState, setGameState] = useState<"idle" | "playing" | "gameover">(
+    "idle"
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [numOfReferer, setNumOfReferer] = useState<number>(0);
+  const [hints, setHints] = useState([]);
+
+  const Hints = () => {
+    return (
+      <div>
+        {hints.map((hint, index) => (
+          <div key={index}>･{hint}</div>
+        ))}
+      </div>
+    );
+  };
 
   const ShareModal = () => {
     if (gameState === "gameover") {
@@ -43,6 +58,7 @@ export default function Home() {
     <div className={`${isModalOpen ? "w-2/5" : "hidden"} bg-white p-4`}>
       <div>
         <div className="text-center text-3xl">{goal}</div>
+        <div className="text-center text-xl">リンク元数:{numOfReferer}</div>
         <div
           dangerouslySetInnerHTML={{ __html: goalArticle }}
           id="articleContent2"
@@ -54,7 +70,7 @@ export default function Home() {
   const pickStart = async () => {
     try {
       const response = await fetch(
-        "https://ja.wikipedia.org/w/api.php?action=query&list=random&rnnamespace=0&rnlimit=1&format=json&origin=*"
+        `https://${locale}.wikipedia.org/w/api.php?action=query&list=random&rnnamespace=0&rnlimit=1&format=json&origin=*`
       );
       const data = await response.json();
       const randomTitle = data.query.random[0].title;
@@ -68,12 +84,16 @@ export default function Home() {
   const getGoal = async () => {
     try {
       const response = await fetch(
-        "https://ja.wikipedia.org/w/api.php?action=query&list=random&rnnamespace=0&rnlimit=1&format=json&origin=*"
+        `https://${locale}.wikipedia.org/w/api.php?action=query&list=random&rnnamespace=0&rnlimit=1&format=json&origin=*`
       );
       const data = await response.json();
       const randomTitle = data.query.random[0].title;
       setGoal(randomTitle);
-      const url = `https://ja.wikipedia.org/w/api.php?action=parse&page=${randomTitle}&format=json&origin=*`;
+      const ref = await countReferer(randomTitle, locale);
+      setNumOfReferer(ref.numOfRef);
+      setHints(ref.hints);
+      console.log(ref.hints);
+      const url = `https://${locale}.wikipedia.org/w/api.php?action=parse&page=${randomTitle}&format=json&origin=*`;
       const response2 = await fetch(url);
       const data2 = await response2.json();
       setGoalArticle(data2.parse.text["*"]);
@@ -107,7 +127,7 @@ export default function Home() {
 
   const fetchTitle = async (title: string) => {
     setIsLoading(true);
-    const url = `https://ja.wikipedia.org/w/api.php?action=parse&page=${title}&format=json&origin=*`;
+    const url = `https://${locale}.wikipedia.org/w/api.php?action=parse&page=${title}&format=json&origin=*`;
     try {
       const response = await fetch(url);
       const data = await response.json();
@@ -160,7 +180,7 @@ export default function Home() {
       const confirm = window.confirm("別のお題でやり直しますか？");
       if (!confirm) return;
     }
-    setGameState("start");
+    setGameState("idle");
     setStroke(-1);
     await getGoal();
     setHistory([]);
