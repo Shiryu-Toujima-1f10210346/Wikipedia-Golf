@@ -21,10 +21,12 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [numOfReferer, setNumOfReferer] = useState<number>(0);
   const [hints, setHints] = useState([]);
+  const [hintModal, setHintModal] = useState<boolean>(false);
 
   const Hints = () => {
     return (
-      <div>
+      <div className="bg-gray-900 text-white p-4 rounded-xl my-6">
+        <div className="text-center text-3xl">ゴールのリンク元一覧</div>
         {hints.map((hint, index) => (
           <div key={index}>･{hint}</div>
         ))}
@@ -55,7 +57,9 @@ export default function Home() {
     setIsModalOpen(!isModalOpen);
   };
   const GoalModal = () => (
-    <div className={`${isModalOpen ? "w-2/5" : "hidden"} bg-white p-4`}>
+    <div
+      className={`${isModalOpen ? "w-2/5" : "hidden"} bg-white p-4 rounded-2xl`}
+    >
       <div>
         <div className="text-center text-3xl">{goal}</div>
         <div className="text-center text-xl">リンク元数:{numOfReferer}</div>
@@ -110,6 +114,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchTitle(title);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title]);
 
   useEffect(() => {
@@ -181,11 +186,12 @@ export default function Home() {
       if (!confirm) return;
     }
     setGameState("idle");
+    setHintModal(false);
     setStroke(-1);
-    await getGoal();
     setHistory([]);
-    await pickStart();
     setIsModalOpen(true);
+    await getGoal();
+    await pickStart();
   };
 
   return (
@@ -205,6 +211,14 @@ export default function Home() {
         >
           スタート
         </button>
+        {gameState === "playing" && (
+          <button
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mx-6 rounded"
+            onClick={() => setHintModal(!hintModal)}
+          >
+            ヒントを見る
+          </button>
+        )}
         {/* <button
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mx-6 rounded"
           onClick={pickRandom}
@@ -222,7 +236,9 @@ export default function Home() {
       <div className="bg-gray-100 text-black mr-96 flex flex-row justify-start items-start">
         {/* 履歴セクション */}
         {/* fix this スクロールできない */}
-        <div className="history flex-none w-1/4 h-4/5 p-4 bg-white border-r-2 border-white rounded-2xl mr-5 sticky top-20">
+        <div
+          className={`history flex-none w-1/4 h-4/5 p-4 bg-white border-r-2 border-white rounded-2xl mr-5 sticky top-20 `}
+        >
           {/* {goal !== "" && stroke > -1 ? ( */}
           {goal !== "" ? (
             <div className="text-center">
@@ -245,9 +261,8 @@ export default function Home() {
               <p>ゴールが設定されていません</p>
             </div>
           )}
-
-          <h2>履歴</h2>
-          <ul className="overflow-auto max-h-screen">
+          {hintModal && <Hints />}
+          <ul className="overflow-auto max-h-screen mt-6">
             {history.map((item, index) => (
               <li key={index}>
                 {item.stroke == 0 ? (
@@ -283,9 +298,8 @@ export default function Home() {
           <div
             id="articleContent"
             dangerouslySetInnerHTML={{ __html: content }}
-            className={`flex-grow p-4 flex flex-col ${
-              isModalOpen ? "w-2/5" : "w-4/5"
-            }`}
+            className={`flex-grow p-4 flex flex-col bg-white ml-8 rounded-2xl
+             ${isModalOpen ? "w-2/5" : "w-4/5"}`}
           />
         )}
       </div>
